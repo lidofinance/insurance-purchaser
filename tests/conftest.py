@@ -74,8 +74,12 @@ class PurchaseHelpers:
     InsurancePurchaser = None
 
     @staticmethod
-    def deploy_purchaser(insurance, deployer):
-        purchaser = PurchaseHelpers.InsurancePurchaser.deploy(insurance, {"from": deployer})
+    def deploy_purchaser(steth_eth_slippage, ldo_steth_slippage, deployer):
+        purchaser = PurchaseHelpers.InsurancePurchaser.deploy(
+            steth_eth_slippage,
+            ldo_steth_slippage,
+            {"from": deployer}
+        )
 
         return purchaser
 

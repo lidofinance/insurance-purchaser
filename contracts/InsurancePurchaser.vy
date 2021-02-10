@@ -21,6 +21,8 @@ interface UnslashedMarketLike:
 
 
 owner: public(address)
+steth_to_eth_est_slippage: public(uint256)
+ldo_to_steth_est_slippage: public(uint256)
 
 
 # unslashed contract
@@ -41,9 +43,20 @@ STETH_INDEX: constant(int128) = 1
 
 
 @external
-def __init__(_insurance_address: address):
+def __init__(_steth_to_eth_est_slippage: uint256, _ldo_to_steth_est_slippage: uint256):
+    """
+    @notice Contract constructor
+    @param _steth_to_eth_est_slippage percentage of addition to the steth amount to compensate the slippage during stETH -> ETH swap
+    @param _ldo_to_steth_est_slippage percentage of addition to the ldo amount to compensate the slippage during LDO -> stETH swap
+    """
     self.owner = msg.sender
-    ERC20(STETH_TOKEN).approve(STETH_ETH_POOL, MAX_UINT256)
+
+    assert _steth_to_eth_est_slippage <= 10000, "curve pool est slippage is over 100 percent"
+    assert _ldo_to_steth_est_slippage <= 10000, "1inch pool est slippage is over 100 percent"
+
+    # percentage is defined in basis points: 1 basis point is equal to 0.01%, 10000 is 100%
+    self.steth_to_eth_est_slippage = _steth_to_eth_est_slippage
+    self.ldo_to_steth_est_slippage = _ldo_to_steth_est_slippage
 
 
 @external
@@ -72,21 +85,21 @@ def get_ldo_amount_to_swap(expected_eth_amount:uint256) -> uint256:
     steth_eth_spot_price:uint256 = CurveLike(STETH_ETH_POOL).get_dy(
         STETH_INDEX,
         ETH_INDEX,
-        1000000000000000000
+        10 ** 18
     )
 
-    steth_for_ldo:uint256 = 10**18 * (eth_for_ldo / steth_eth_spot_price)
-    steth_for_ldo = steth_for_ldo + steth_for_ldo / 100 # +1%
+    steth_for_ldo:uint256 = 10 ** 18 * (eth_for_ldo / steth_eth_spot_price)
+    steth_for_ldo += (steth_for_ldo * self.steth_to_eth_est_slippage) / 10000
 
     ldo_balance:uint256 = ERC20(LDO_TOKEN).balanceOf(self)
     ldo_steth_spot_price:uint256 = MooniswapLike(STETH_LDO_POOL).getReturn(
         LDO_TOKEN,
         STETH_TOKEN,
-        1000000000000000000
+        10 ** 18
     )
 
-    ldo_to_swap:uint256 = 10**18 * steth_for_ldo / ldo_steth_spot_price
-    ldo_to_swap = ldo_to_swap + ldo_to_swap / 5 # +5%
+    ldo_to_swap:uint256 = 10 ** 18 * steth_for_ldo / ldo_steth_spot_price
+    ldo_to_swap += (ldo_to_swap * self.ldo_to_steth_est_slippage) / 10000
 
     return ldo_to_swap
 
@@ -126,7 +139,7 @@ def purchase(_insurance_price_in_eth: uint256):
     UnslashedMarketLike(UNSLASHED_MARKET).depositPremium(value=_insurance_price_in_eth)
     ERC20(UNSLASHED_PREMIUM_TOKEN).transfer(self.owner, ERC20(UNSLASHED_PREMIUM_TOKEN).balanceOf(self))
 
-    # transfer the rest to the agent
+    # transfer the rest ETH and tokens to the agent
     if self.balance != 0:
         send(self.owner, self.balance)
 
@@ -147,6 +160,22 @@ def transfer_ownership(_to: address):
 
 
 @external
+def set_est_slippages(_steth_to_eth_est_slippage: uint256, _ldo_to_steth_est_slippage: uint256):
+    """
+    @notice Changes the slippage. Can only be called by the current owner.
+    @param _steth_to_eth_est_slippage percentage of addition to the steth amount to compensate the slippage during stETH -> ETH swap
+    @param _ldo_to_steth_est_slippage percentage of addition to the ldo amount to compensate the slippage during LDO -> stETH swap
+    """
+    assert msg.sender == self.owner, "not permitted"
+    assert _steth_to_eth_est_slippage <= 10000, "curve pool est slippage is over 100 percent"
+    assert _ldo_to_steth_est_slippage <= 10000, "1inch pool est slippage is over 100 percent"
+
+    # percentage is defined in basis points: 1 basis point is equal to 0.01%, 10000 is 100%
+    self.steth_to_eth_est_slippage = _steth_to_eth_est_slippage
+    self.ldo_to_steth_est_slippage = _ldo_to_steth_est_slippage
+
+
+@external
 def recover_erc20(_token: address, _recipient: address = msg.sender):
     """
     @notice
@@ -157,3 +186,7 @@ def recover_erc20(_token: address, _recipient: address = msg.sender):
     token_balance: uint256 = ERC20(_token).balanceOf(self)
     if token_balance != 0:
         assert ERC20(_token).transfer(_recipient, token_balance), "token transfer failed"
+
+    if self.balance != 0:
+        send(_recipient, self.balance)
+

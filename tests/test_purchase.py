@@ -22,7 +22,8 @@ def test_happy_path(
 ):
     # deploying and purhchase
     insurance_purchaser = purchase_helpers.deploy_purchaser(
-        "0x746d94f1161C991675Ede99aBCDb0412a4fEE43E",
+        100,
+        500,
         deployer=deployer
     )
 

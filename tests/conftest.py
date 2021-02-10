@@ -27,8 +27,13 @@ def stranger(accounts):
 
 # Lido DAO Voting app
 @pytest.fixture(scope='module')
-def dao_voting(accounts):
+def dao_voting_impersonated(accounts):
     return accounts.at("0x2e59A20f205bB85a89C53f1936454680651E618e", force=True)
+
+
+@pytest.fixture(scope='module')
+def dao_voting(interface):
+    return interface.Voting("0x2e59A20f205bB85a89C53f1936454680651E618e")
 
 
 @pytest.fixture(scope='module')

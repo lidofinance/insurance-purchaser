@@ -10,4 +10,3 @@ networks:
       accounts: 10
       evm_version: istanbul
       mnemonic: brownie
-

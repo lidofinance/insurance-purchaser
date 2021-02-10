@@ -46,48 +46,87 @@ def __init__(_insurance_address: address):
     ERC20(STETH_TOKEN).approve(STETH_ETH_POOL, MAX_UINT256)
 
 
-@payable
 @external
-def fail():
-    CurveLike(STETH_ETH_POOL).exchange(STETH_INDEX, ETH_INDEX, 10000000, 0)
+@payable
+def __default__():
+    assert msg.value > 0 # dev: unexpected call
+
+
+@view
+@internal
+def get_ldo_amount_to_swap(expected_eth_amount:uint256) -> uint256:
+    steth_balance:uint256 = ERC20(STETH_TOKEN).balanceOf(self)
+
+    eth_after_initial_steth_swap:uint256 = 0
+    if steth_balance > 0:
+        eth_after_initial_steth_swap = CurveLike(STETH_ETH_POOL).get_dy(
+            STETH_INDEX,
+            ETH_INDEX,
+            steth_balance
+        )
+
+    if eth_after_initial_steth_swap >= expected_eth_amount:
+        return 0
+
+    eth_for_ldo: uint256 = expected_eth_amount - eth_after_initial_steth_swap
+    steth_eth_spot_price:uint256 = CurveLike(STETH_ETH_POOL).get_dy(
+        STETH_INDEX,
+        ETH_INDEX,
+        1000000000000000000
+    )
+
+    steth_for_ldo:uint256 = 10**18 * (eth_for_ldo / steth_eth_spot_price)
+    steth_for_ldo = steth_for_ldo + steth_for_ldo / 100 # +1%
+
+    ldo_balance:uint256 = ERC20(LDO_TOKEN).balanceOf(self)
+    ldo_steth_spot_price:uint256 = MooniswapLike(STETH_LDO_POOL).getReturn(
+        LDO_TOKEN,
+        STETH_TOKEN,
+        1000000000000000000
+    )
+
+    ldo_to_swap:uint256 = 10**18 * steth_for_ldo / ldo_steth_spot_price
+    ldo_to_swap = ldo_to_swap + ldo_to_swap / 5 # +5%
+
+    return ldo_to_swap
+
 
 @external
 def purchase(_insurance_price_in_eth: uint256):
-    steth_balance_before:uint256 = ERC20(STETH_TOKEN).balanceOf(self)
-    ldo_balance_before:uint256 = ERC20(LDO_TOKEN).balanceOf(self)
+    steth_balance:uint256 = ERC20(STETH_TOKEN).balanceOf(self)
+    ldo_balance:uint256 = ERC20(LDO_TOKEN).balanceOf(self)
 
-    assert steth_balance_before + ldo_balance_before != 0, "contract should have ldo or steth tokens"
+    assert steth_balance + ldo_balance != 0, "contract should have ldo or steth tokens"
     assert _insurance_price_in_eth != 0, "_insurance_price_in_eth should be greater than 0"
 
-    steth_for_ldo_spot_price:uint256 = MooniswapLike(STETH_LDO_POOL).getReturn(LDO_TOKEN, STETH_TOKEN, 1000000000000000000)
+    ldo_to_swap: uint256 = self.get_ldo_amount_to_swap(_insurance_price_in_eth)
 
-    expected_steth:uint256 = 0
-    if _insurance_price_in_eth > steth_balance_before:
-        expected_steth = _insurance_price_in_eth - steth_balance_before
+    # swap LDO -> stETH if needed
+    if ldo_to_swap > 0:
+        ERC20(LDO_TOKEN).approve(STETH_LDO_POOL, ldo_to_swap)
+        MooniswapLike(STETH_LDO_POOL).swap(
+            LDO_TOKEN,
+            STETH_TOKEN,
+            ldo_to_swap,
+            0,
+            ZERO_ADDRESS
+        )
 
-    ldo_to_swap:uint256 = expected_steth / steth_for_ldo_spot_price
-    ldo_to_swap = ldo_to_swap + ldo_to_swap / 5 # add 5%
-
-    assert ldo_balance_before >= ldo_to_swap, "contract should have enough LDO balance"
-
-    # TODO: check ldo_to_swap > 0
-
-    # approve and swap LDO -> stETH
-    ERC20(LDO_TOKEN).approve(STETH_LDO_POOL, ldo_to_swap)
-    min_steth_return: uint256 = 0 #because this is not the last swap in tx
-    MooniswapLike(STETH_LDO_POOL).swap(LDO_TOKEN, STETH_TOKEN, ldo_to_swap, 10, ZERO_ADDRESS)
-
-    # approve and swap stETH -> ETH
-    steth_balance_before = ERC20(STETH_TOKEN).balanceOf(self)
-    token_balance: uint256 = ERC20(STETH_TOKEN).balanceOf(self)
-    ERC20(STETH_TOKEN).approve(STETH_ETH_POOL, steth_balance_before)
-    eth_amount: uint256 = CurveLike(STETH_ETH_POOL).exchange(STETH_INDEX, ETH_INDEX, steth_balance_before, _insurance_price_in_eth)
+    # swap stETH -> ETH
+    steth_balance = ERC20(STETH_TOKEN).balanceOf(self)
+    ERC20(STETH_TOKEN).approve(STETH_ETH_POOL, steth_balance)
+    eth_amount: uint256 = CurveLike(STETH_ETH_POOL).exchange(
+        STETH_INDEX,
+        ETH_INDEX,
+        steth_balance,
+        _insurance_price_in_eth
+    )
 
     # purchase insurance tokens and transfer them back to the agent
-    UnslashedMarketLike(UNSLASHED_MARKET).depositPremium(value=eth_amount)
+    UnslashedMarketLike(UNSLASHED_MARKET).depositPremium(value=_insurance_price_in_eth)
     ERC20(UNSLASHED_PREMIUM_TOKEN).transfer(self.owner, ERC20(UNSLASHED_PREMIUM_TOKEN).balanceOf(self))
 
-    # transfer the rest of the ETH back to the agent
+    # transfer the rest to the agent
     if self.balance != 0:
         send(self.owner, self.balance)
 

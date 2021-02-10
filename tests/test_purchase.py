@@ -21,19 +21,19 @@ def test_happy_path(
     purchase_helpers
 ):
     # deploying and purhchase
-
     insurance_purchaser = purchase_helpers.deploy_purchaser(
         "0x746d94f1161C991675Ede99aBCDb0412a4fEE43E",
         deployer=deployer
     )
 
-    steth_token.transfer(insurance_purchaser, Wei("3 ether"), {"from": steth_whale})
+    # steth_token.transfer(insurance_purchaser, Wei("1 ether"), {"from": steth_whale})
     ldo_token.transfer(insurance_purchaser, Wei("2000 ether"), {"from": ldo_whale})
 
-    print('steth balance', steth_token.balanceOf(insurance_purchaser))
-    # tx = insurance_purchaser.purchase(Wei("2 ether"))
-    tx = insurance_purchaser.fail({"from": deployer})
-    print(tx.events)
+    print('steth balance before', steth_token.balanceOf(insurance_purchaser))
+    print('ldo balance before', ldo_token.balanceOf(insurance_purchaser))
+    tx = insurance_purchaser.purchase(Wei("1 ether"), {"from": deployer})
 
-    # assert unslashed_token.balanceOf(deployer) > 0
+    print(tx.events)
+    print('unslashed_token afterall', unslashed_token.balanceOf(deployer))
+    assert unslashed_token.balanceOf(deployer) > 0
 

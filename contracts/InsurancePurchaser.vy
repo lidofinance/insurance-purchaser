@@ -1,5 +1,5 @@
 # @version 0.2.8
-# @notice A proxy contract for purchase insurance.
+# @notice A proxy contract to purchase insurance.
 # @author ujenjt
 # @license MIT
 from vyper.interfaces import ERC20
@@ -66,10 +66,10 @@ def __default__():
 
 @view
 @internal
-def get_ldo_amount_to_swap(expected_eth_amount:uint256) -> uint256:
-    steth_balance:uint256 = ERC20(STETH_TOKEN).balanceOf(self)
+def get_ldo_amount_to_swap(expected_eth_amount: uint256) -> uint256:
+    steth_balance: uint256 = ERC20(STETH_TOKEN).balanceOf(self)
 
-    eth_after_initial_steth_swap:uint256 = 0
+    eth_after_initial_steth_swap: uint256 = 0
     if steth_balance > 0:
         eth_after_initial_steth_swap = StableSwapLike(CURVE_STETH_ETH).get_dy(
             STETH_INDEX,
@@ -81,22 +81,22 @@ def get_ldo_amount_to_swap(expected_eth_amount:uint256) -> uint256:
         return 0
 
     eth_for_ldo: uint256 = expected_eth_amount - eth_after_initial_steth_swap
-    steth_eth_spot_price:uint256 = StableSwapLike(CURVE_STETH_ETH).get_dy(
+    steth_eth_spot_price: uint256 = StableSwapLike(CURVE_STETH_ETH).get_dy(
         STETH_INDEX,
         ETH_INDEX,
         10 ** 18
     )
 
-    steth_for_ldo:uint256 = (10 ** 18 * eth_for_ldo) / steth_eth_spot_price
+    steth_for_ldo: uint256 = (10 ** 18 * eth_for_ldo) / steth_eth_spot_price
     steth_for_ldo += (steth_for_ldo * self.steth_to_eth_est_slippage) / 10000
 
-    ldo_steth_spot_price:uint256 = MooniswapLike(MOONISWAP_STETH_LDO).getReturn(
+    ldo_steth_spot_price: uint256 = MooniswapLike(MOONISWAP_STETH_LDO).getReturn(
         LDO_TOKEN,
         STETH_TOKEN,
         10 ** 18
     )
 
-    ldo_to_swap:uint256 = (10 ** 18 * steth_for_ldo) / ldo_steth_spot_price
+    ldo_to_swap: uint256 = (10 ** 18 * steth_for_ldo) / ldo_steth_spot_price
     ldo_to_swap += (ldo_to_swap * self.ldo_to_steth_est_slippage) / 10000
 
     return ldo_to_swap
@@ -104,8 +104,8 @@ def get_ldo_amount_to_swap(expected_eth_amount:uint256) -> uint256:
 
 @external
 def purchase(_insurance_price_in_eth: uint256):
-    steth_balance:uint256 = ERC20(STETH_TOKEN).balanceOf(self)
-    ldo_balance:uint256 = ERC20(LDO_TOKEN).balanceOf(self)
+    steth_balance: uint256 = ERC20(STETH_TOKEN).balanceOf(self)
+    ldo_balance: uint256 = ERC20(LDO_TOKEN).balanceOf(self)
 
     owner_: address = self.owner
 

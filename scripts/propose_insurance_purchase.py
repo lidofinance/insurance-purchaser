@@ -39,6 +39,7 @@ def propose_insurance_purchase(
     ldo_amount,
     steth_amount,
     insurance_amount,
+    min_insurance_tokens,
     reference,
     tx_params
 ):
@@ -68,7 +69,8 @@ def propose_insurance_purchase(
         (
             insurance_purchaser.address,
             insurance_purchaser.purchase.encode_input(
-                insurance_amount
+                insurance_amount,
+                min_insurance_tokens
             )
         )
     ])
@@ -91,6 +93,7 @@ def main():
 
     insurance_purchaser_address = os.environ['INSURANCE_PURCHASER_ADDRESS']
     insurance_amount = Wei('56.25 ether')
+    min_insurance_tokens = Wei('55.5 ether')
     ldo_amount = Wei('50000 ether')
     steth_amount = Wei('12 ether')
     reference = "Purchase for slashing insurance"
@@ -109,6 +112,7 @@ def main():
         ldo_amount=ldo_amount,
         steth_amount=steth_amount,
         insurance_amount=insurance_amount,
+        min_insurance_tokens=min_insurance_tokens,
         reference=reference,
         tx_params={"from": deployer, "gas_price": Wei(gas_price), "required_confs": 1}
     )[0]

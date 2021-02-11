@@ -51,15 +51,17 @@ def test_vote_for_ldo_transfer(
     assert insurance_purchaser.owner() == dao_agent.address
 
     insurance_amount = Wei('56.25 ether')
+    min_insurance_tokens = Wei('55.5 ether')
     ldo_amount = Wei('50000 ether')
     steth_amount = Wei('12 ether')
-    expected_insurance_token_amount = 71176991340977060921
+    expected_insurance_token_amount = 70000000000000000000  # 71028699570773128489
 
     vote_id = propose_insurance_purchase(
         insurance_purchaser=insurance_purchaser,
         ldo_amount=ldo_amount,
         steth_amount=steth_amount,
         insurance_amount=insurance_amount,
+        min_insurance_tokens=min_insurance_tokens,
         reference='Purchase slashing insurance',
         tx_params={'from': dao_holders[0]}
     )[0]
@@ -76,4 +78,5 @@ def test_vote_for_ldo_transfer(
     tx = dao_voting.executeVote(vote_id, {'from': accounts[0]})
     print(tx.events)
 
-    assert unslashed_token.balanceOf(dao_agent) >= expected_insurance_token_amount
+    assert unslashed_token.balanceOf(
+        dao_agent) >= expected_insurance_token_amount

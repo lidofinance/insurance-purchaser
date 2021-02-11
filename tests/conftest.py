@@ -15,7 +15,7 @@ def deployer(accounts):
 @pytest.fixture()
 def steth_whale(accounts, steth_token, lido):
     acct = accounts[1]
-    lido.submit(ZERO_ADDRESS, {"from": acct, "value": "10 ether"})
+    lido.submit(ZERO_ADDRESS, {"from": acct, "value": "100 ether"})
     assert steth_token.balanceOf(acct) > 0
     return acct
 

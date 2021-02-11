@@ -103,7 +103,7 @@ def get_ldo_amount_to_swap(expected_eth_amount: uint256) -> uint256:
 
 
 @external
-def purchase(_insurance_price_in_eth: uint256):
+def purchase(_insurance_price_in_eth: uint256, _min_insurance: uint256):
     steth_balance: uint256 = ERC20(STETH_TOKEN).balanceOf(self)
     ldo_balance: uint256 = ERC20(LDO_TOKEN).balanceOf(self)
 
@@ -137,7 +137,12 @@ def purchase(_insurance_price_in_eth: uint256):
 
     # purchase insurance tokens and transfer them back to the agent
     UnslashedMarketLike(UNSLASHED_MARKET).depositPremium(value=_insurance_price_in_eth)
-    ERC20(UNSLASHED_PREMIUM_TOKEN).transfer(owner_, ERC20(UNSLASHED_PREMIUM_TOKEN).balanceOf(self))
+
+    insurance_token_amount: uint256 = ERC20(UNSLASHED_PREMIUM_TOKEN).balanceOf(self)
+
+    assert insurance_token_amount > _min_insurance, 'too few insurance tokens purchased'
+
+    ERC20(UNSLASHED_PREMIUM_TOKEN).transfer(owner_, insurance_token_amount)
 
     # transfer the rest ETH and tokens to the agent
     if self.balance != 0:

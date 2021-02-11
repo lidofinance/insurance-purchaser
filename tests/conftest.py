@@ -62,10 +62,20 @@ def ldo_token(interface):
     return interface.ERC20("0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32")
 
 
+@pytest.fixture(scope='module')
+def mooniswap_steth_ldo(interface):
+    return interface.Mooniswap("0x1f629794B34FFb3B29FF206Be5478A52678b47ae")
+
+
+@pytest.fixture(scope='module')
+def stable_swap_steth_eth(interface):
+    return interface.StableSwapSTETH("0xDC24316b9AE028F1497c275EB9192a3Ea0f67022")
+
 
 @pytest.fixture()
 def ldo_whale(accounts, ldo_token):
-    acct = accounts.at("0x454f11d58e27858926d7a4ece8bfea2c33e97b13", force=True)
+    acct = accounts.at(
+        "0x454f11d58e27858926d7a4ece8bfea2c33e97b13", force=True)
     assert ldo_token.balanceOf(acct) > 0
     return acct
 
@@ -98,13 +108,14 @@ def purchase_helpers(InsurancePurchaser):
 class Helpers:
     @staticmethod
     def filter_events_from(addr, events):
-      return list(filter(lambda evt: evt.address == addr, events))
+        return list(filter(lambda evt: evt.address == addr, events))
 
     @staticmethod
     def assert_single_event_named(evt_name, tx, evt_keys_dict):
-      receiver_events = Helpers.filter_events_from(tx.receiver, tx.events[evt_name])
-      assert len(receiver_events) == 1
-      assert dict(receiver_events[0]) == evt_keys_dict
+        receiver_events = Helpers.filter_events_from(
+            tx.receiver, tx.events[evt_name])
+        assert len(receiver_events) == 1
+        assert dict(receiver_events[0]) == evt_keys_dict
 
 
 @pytest.fixture(scope='module')

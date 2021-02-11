@@ -1,7 +1,14 @@
 import os
 import sys
-from brownie import network, accounts, Wei, interface
 from utils.evm_script import encode_call_script
+
+from brownie import (
+    network,
+    accounts,
+    interface,
+    InsurancePurchaser,
+    Wei
+)
 
 from utils.config import (
     lido_dao_voting_address,
@@ -86,7 +93,7 @@ def propose_insurance_purchase(
 
 def main():
     is_live = get_is_live()
-    deployer = get_deployer_account(True)
+    deployer = get_deployer_account(is_live)
 
     if 'INSURANCE_PURCHASER_ADDRESS' not in os.environ:
         raise EnvironmentError('Please set the INSURANCE_PURCHASER_ADDRESS env variable')
@@ -105,7 +112,7 @@ def main():
         print('Aborting')
         return
 
-    insurance_purchaser = InsurancePurchaser(insurance_purchaser_address)
+    insurance_purchaser = InsurancePurchaser.at(insurance_purchaser_address)
 
     vote_id = propose_insurance_purchase(
         insurance_purchaser=insurance_purchaser,

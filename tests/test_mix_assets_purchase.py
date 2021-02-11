@@ -138,7 +138,7 @@ def test_mixed_steth_ldo_purchase(steth_token,
     steth_token.transfer(insurance_purchaser, Wei(
         "28.40625 ether"), {"from": steth_whale})
 
-    ldo_amount_on_agent = Wei("23330 ether")
+    ldo_amount_on_agent = Wei("50000 ether")
 
     ldo_token.transfer(insurance_purchaser,
                        ldo_amount_on_agent, {"from": ldo_whale})

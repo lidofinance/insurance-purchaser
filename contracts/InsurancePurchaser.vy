@@ -114,6 +114,8 @@ def purchase(_insurance_price_in_eth: uint256, _min_insurance: uint256):
 
     ldo_to_swap: uint256 = self.get_ldo_amount_to_swap(_insurance_price_in_eth)
 
+    assert ERC20(LDO_TOKEN).balanceOf(self) >= ldo_to_swap, "should have enough ldo"
+
     # swap LDO -> stETH if needed
     if ldo_to_swap > 0:
         ERC20(LDO_TOKEN).approve(MOONISWAP_STETH_LDO, ldo_to_swap)

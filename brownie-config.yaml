@@ -10,3 +10,4 @@ networks:
       accounts: 10
       evm_version: istanbul
       mnemonic: brownie
+      fork: https://mainnet.infura.io/v3/$WEB3_CONNECTION_PROVIDER

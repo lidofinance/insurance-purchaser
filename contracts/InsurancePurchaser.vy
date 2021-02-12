@@ -66,7 +66,7 @@ def __default__():
 
 @view
 @internal
-def get_ldo_amount_to_swap(expected_eth_amount: uint256) -> uint256:
+def _get_ldo_amount_to_swap(_expected_eth_amount: uint256) -> uint256:
     steth_balance: uint256 = ERC20(STETH_TOKEN).balanceOf(self)
 
     eth_after_initial_steth_swap: uint256 = 0
@@ -77,10 +77,10 @@ def get_ldo_amount_to_swap(expected_eth_amount: uint256) -> uint256:
             steth_balance
         )
 
-    if eth_after_initial_steth_swap >= expected_eth_amount:
+    if eth_after_initial_steth_swap >= _expected_eth_amount:
         return 0
 
-    eth_for_ldo: uint256 = expected_eth_amount - eth_after_initial_steth_swap
+    eth_for_ldo: uint256 = _expected_eth_amount - eth_after_initial_steth_swap
     steth_eth_spot_price: uint256 = StableSwapLike(CURVE_STETH_ETH).get_dy(
         STETH_INDEX,
         ETH_INDEX,
@@ -112,7 +112,7 @@ def purchase(_insurance_price_in_eth: uint256, _min_insurance: uint256):
     assert steth_balance + ldo_balance != 0, "contract should have ldo or steth tokens"
     assert _insurance_price_in_eth != 0, "_insurance_price_in_eth should be greater than 0"
 
-    ldo_to_swap: uint256 = self.get_ldo_amount_to_swap(_insurance_price_in_eth)
+    ldo_to_swap: uint256 = self._get_ldo_amount_to_swap(_insurance_price_in_eth)
 
     assert ERC20(LDO_TOKEN).balanceOf(self) >= ldo_to_swap, "should have enough ldo"
 

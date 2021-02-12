@@ -70,8 +70,10 @@ def test_owner_recovers_erc20(deployer, stranger, steth_token, steth_whale):
     deployer_steth_before = steth_token.balanceOf(deployer)
     deployer_eth_before = deployer.balance()
 
+    steth_balance = steth_token.balanceOf(insurance_purchaser.address)
+
     # recover erc20 and ether
-    insurance_purchaser.recover_erc20(steth_token.address, {"from": deployer})
+    insurance_purchaser.recover_erc20(steth_token.address, steth_balance, {"from": deployer})
 
     assert insurance_purchaser.balance() == 0
     assert steth_token.balanceOf(insurance_purchaser.address) <= STETH_DUST_DELTA
@@ -90,19 +92,38 @@ def test_owner_recovers_only_eth(deployer, stranger, steth_token):
     stranger.transfer(insurance_purchaser.address, "1 ether")
     deployer_eth_before = deployer.balance()
 
+    steth_balance = steth_token.balanceOf(deployer)
+
     # you can pass here any token
-    insurance_purchaser.recover_erc20(steth_token.address, {"from": deployer})
+    insurance_purchaser.recover_erc20(steth_token.address, steth_balance, {"from": deployer})
 
     assert insurance_purchaser.balance() == 0
     assert deployer.balance() - deployer_eth_before == Wei("1 ether")
 
 
-def test_stranger_does_not_recover_erc20(deployer, stranger, steth_token):
+def test_stranger_recovers_erc20_to_contract_owner(deployer, stranger, steth_token, steth_whale):
+
     insurance_purchaser = InsurancePurchaser.deploy(
         steth_to_eth_max_slippage,
         ldo_to_steth_max_slippage,
         {"from": deployer}
     )
 
-    with reverts("not permitted"):
-        insurance_purchaser.recover_erc20(steth_token.address, {"from": stranger})
+    STETH_DUST_DELTA = 2  # 2 wei
+
+    steth_token.transfer(insurance_purchaser.address, Wei("1 ether"), {"from": steth_whale})
+    stranger.transfer(insurance_purchaser.address, "1 ether")
+
+    deployer_steth_before = steth_token.balanceOf(deployer)
+    deployer_eth_before = deployer.balance()
+
+    steth_balance = steth_token.balanceOf(insurance_purchaser.address)
+
+    # recover erc20 and ether
+    insurance_purchaser.recover_erc20(steth_token.address, steth_balance, {"from": stranger})
+
+    assert insurance_purchaser.balance() == 0
+    assert steth_token.balanceOf(insurance_purchaser.address) <= STETH_DUST_DELTA
+
+    assert steth_token.balanceOf(deployer) - deployer_steth_before >= Wei("1 ether") - STETH_DUST_DELTA
+    assert deployer.balance() - deployer_eth_before == Wei("1 ether")

@@ -179,16 +179,20 @@ def set_est_slippages(_steth_to_eth_est_slippage: uint256, _ldo_to_steth_est_sli
 
 
 @external
-def recover_erc20(_token: address, _recipient: address = msg.sender):
+def recover_erc20(_token: address, _token_amount: uint256 = 0):
     """
     @notice
-        Transfers the whole balance of the given ERC20 token from self
-        to the recipient. Can only be called by the owner.
+        Transfers the the given ERC20 token and the whole
+        ETH balance from self to the owner of self.
     """
-    assert msg.sender == self.owner, "not permitted"
-    token_balance: uint256 = ERC20(_token).balanceOf(self)
-    if token_balance != 0:
-        assert ERC20(_token).transfer(_recipient, token_balance), "token transfer failed"
+    token_amount: uint256 = _token_amount
+    recipient: address = self.owner
+
+    if token_amount == 0:
+        token_amount = ERC20(_token).balanceOf(self)
+
+    if token_amount != 0:
+        ERC20(_token).transfer(recipient, token_amount)
 
     if self.balance != 0:
-        send(_recipient, self.balance)
+        send(recipient, self.balance)

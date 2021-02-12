@@ -1,0 +1,47 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "cover",
+        "type": "uint256"
+      }
+    ],
+    "name": "coverToPremiumTokens",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0xa8471f97"
+  },
+  {
+    "inputs": [],
+    "name": "premiumTokenPrice18eRatio",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true,
+    "signature": "0x1f6cca1d"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "depositPremium",
+    "outputs": [],
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]

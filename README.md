@@ -1,6 +1,6 @@
 # Insurance purchasing contract for Lido
 
-Contains a proxy contract which takes LDO and stETH tokens from treasury and convert them to ETH (LDO -> stETH -> ETH) and than purchase insurance by Unslashed which covers eth2 validators slashing.
+Contains a proxy contract which takes LDO and stETH tokens from the treasury, converts them to ETH (LDO -> stETH -> ETH), and then purchases insurance by Unslashed to cover eth2 validators slashing.
 
 ## Development
 
@@ -12,7 +12,7 @@ Contains a proxy contract which takes LDO and stETH tokens from treasury and con
 
 ### Dev and test
 
-To get started, first create and initialize a Python [virtual environment](https://docs.python.org/3/library/venv.html). Next, clone the repo and install the developer dependencies:
+To get started, first create and initialize a Python [virtual environment](https://docs.python.org/3/library/venv.html). Next, clone the repo and install the dependencies. Run the tests:
 
 ```bash
 git clone https://github.com/lidofinance/insurance-purchaser.git
@@ -23,18 +23,17 @@ brownie test
 
 ## Check aragon vote execution script
 
-To validate that proposed vote for transferring tokens (LDO, stETH) to the InsurancePurchaser is correct, you need to do following steps:
+To validate that a proposed vote for transferring tokens (LDO, stETH) to the InsurancePurchaser is correct, you need to do the following steps:
 
-1. Open Lido [`voting app`](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract) in the etherscan and fetch the vote with the corresponding `id` and extract the `script` field content.
+1. Open Lido [`voting app`](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract) in etherscan, fetch the vote with the corresponding `id`, and extract the `script` field content.
 
-2. Ensure that the configuration settings of proposed purchase is correct [`scripts/generate_purchase_exec_script.py`](scripts/generate_purchase_exec_script.py).
+2. Check the configuration of the proposed purchase in [`scripts/generate_purchase_exec_script.py`](scripts/generate_purchase_exec_script.py) (`ldo_amount`, `steth_amount`, `insurance_amount`, `reference`).
 
-3. Run the script and ensure that it match the extracted one from etherscan.
+3. Run `scripts/generate_purchase_exec_script.py` and check that the exec script it generates matches the one extracted from the vote.
 
     ```bash
     brownie run generate_purchase_exec_script --network mainnet
     ```
-    When the script completes it will print the generated exec script.
 
 
 ## Deployment
@@ -66,7 +65,7 @@ To propose a new purchase:
     ```bash
     brownie run propose_insurance_purchase --network development
     ```
-3. Set DEPLOYER env variable to the deployer account name first (from ~/.brownie/accounts). Important: DEPLOYER acc should have some LDO governance token to be able to submit new vote.
+3. Set DEPLOYER env variable to the deployer account name first (from `~/.brownie/accounts`). Important: DEPLOYER acc should have some LDO governance token to be able to submit new vote.
 
     ```bash
     export DEPLOYER=ldo_holder
@@ -88,22 +87,22 @@ To propose a new purchase:
     brownie console --network development
     ```
 
-2. Deploy insurance purchaser with script from the console
+2. Deploy insurance purchaser by running deploy script from the console.
     ```bash
     >>> run("deploy.py")
     >>> purchaser = InsurancePurchaser.at("0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6")
     ```
 
-3. Edit the configuration settings within [`propose_insurance_purchase.py`](propose_insurance_purchase.py). Put right address for InsurancePurchaser.
+3. Edit the configuration settings within [`propose_insurance_purchase.py`](propose_insurance_purchase.py). Put the actual address for `InsurancePurchaser`.
 
-4. Get some LDO tokens to be able to submit a vote
+4. Get some LDO tokens to be able to submit a vote.
     ```bash
     >>> run("get_coins.py")
     >>> ldo_token = interface.ERC20("0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32")
     >>> ldo_token.balanceOf(accounts[0])
     ```
 
-5. Propose a vote and check the script
+5. Propose a vote and check the script.
     ```bash
     >>> run("propose_insurance_purchase.py")
     >>> voting = interface.Voting("0x2e59A20f205bB85a89C53f1936454680651E618e")

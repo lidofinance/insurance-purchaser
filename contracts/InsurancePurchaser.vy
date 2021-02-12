@@ -191,8 +191,7 @@ def recover_erc20(_token: address, _token_amount: uint256 = 0):
     if token_amount == 0:
         token_amount = ERC20(_token).balanceOf(self)
 
-    if token_amount != 0:
-        ERC20(_token).transfer(recipient, token_amount)
+    ERC20(_token).transfer(recipient, token_amount)
 
     if self.balance != 0:
         send(recipient, self.balance)

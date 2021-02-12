@@ -179,19 +179,15 @@ def set_est_slippages(_steth_to_eth_est_slippage: uint256, _ldo_to_steth_est_sli
 
 
 @external
-def recover_erc20(_token: address, _token_amount: uint256 = 0):
+def recover_erc20(_token: address, _token_amount: uint256):
     """
     @notice
         Transfers the the given ERC20 token and the whole
         ETH balance from self to the owner of self.
     """
-    token_amount: uint256 = _token_amount
     recipient: address = self.owner
 
-    if token_amount == 0:
-        token_amount = ERC20(_token).balanceOf(self)
-
-    ERC20(_token).transfer(recipient, token_amount)
+    ERC20(_token).transfer(recipient, _token_amount)
 
     if self.balance != 0:
         send(recipient, self.balance)

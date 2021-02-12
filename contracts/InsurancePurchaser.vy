@@ -128,7 +128,7 @@ def purchase(_insurance_price_in_eth: uint256, _min_insurance: uint256):
     # swap stETH -> ETH
     steth_balance = ERC20(STETH_TOKEN).balanceOf(self)
     ERC20(STETH_TOKEN).approve(CURVE_STETH_ETH, steth_balance)
-    eth_amount: uint256 = StableSwapLike(CURVE_STETH_ETH).exchange(
+    StableSwapLike(CURVE_STETH_ETH).exchange(
         STETH_INDEX,
         ETH_INDEX,
         steth_balance,

@@ -1,5 +1,6 @@
-from brownie import Wei
+from brownie import Wei, InsurancePurchaser
 from scripts.propose_insurance_purchase import propose_insurance_purchase
+
 
 dao_holders = [
     '0x3e40d73eb977dc6a537af587d48316fee66e9c8c',
@@ -22,9 +23,9 @@ dao_holders = [
     '0x9849c2c1b73b41aee843a002c332a2d16aaab611'
 ]
 
+
 def test_vote_for_ldo_transfer(
     steth_token,
-    steth_pool,
     ldo_token,
     unslashed_token,
     dao_voting,
@@ -33,17 +34,16 @@ def test_vote_for_ldo_transfer(
     stranger,
     steth_whale,
     ldo_whale,
-    purchase_helpers,
     accounts
 ):
     # the DAO are not holding insurance token at the begining
     assert unslashed_token.balanceOf(dao_agent) == 0
 
     # deploy a proxy contract that will handle purchasing
-    insurance_purchaser = purchase_helpers.deploy_purchaser(
+    insurance_purchaser = InsurancePurchaser.deploy(
         100,
-        300,
-        deployer=deployer
+        400,
+        {"from": deployer}
     )
 
     assert insurance_purchaser.owner() == deployer
@@ -51,10 +51,9 @@ def test_vote_for_ldo_transfer(
     assert insurance_purchaser.owner() == dao_agent.address
 
     insurance_amount = Wei('56.25 ether')
-    min_insurance_tokens = Wei('55.5 ether')
+    min_insurance_tokens = Wei('70 ether')
     ldo_amount = Wei('50000 ether')
     steth_amount = Wei('12 ether')
-    expected_insurance_token_amount = 70000000000000000000  # 71028699570773128489
 
     vote_id = propose_insurance_purchase(
         insurance_purchaser=insurance_purchaser,
@@ -75,8 +74,8 @@ def test_vote_for_ldo_transfer(
         dao_voting.vote(vote_id, True, False, {'from': account})
 
     assert dao_voting.canExecute(vote_id)
+
     tx = dao_voting.executeVote(vote_id, {'from': accounts[0]})
     print(tx.events)
 
-    assert unslashed_token.balanceOf(
-        dao_agent) >= expected_insurance_token_amount
+    assert unslashed_token.balanceOf(dao_agent) >= Wei("70 ether")

@@ -1,4 +1,3 @@
-import os
 import sys
 from utils.evm_script import encode_call_script
 
@@ -95,17 +94,21 @@ def main():
     is_live = get_is_live()
     deployer = get_deployer_account(is_live)
 
-    if 'INSURANCE_PURCHASER_ADDRESS' not in os.environ:
-        raise EnvironmentError('Please set the INSURANCE_PURCHASER_ADDRESS env variable')
-
-    insurance_purchaser_address = os.environ['INSURANCE_PURCHASER_ADDRESS']
+    insurance_purchaser_address = "0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6"
     insurance_amount = Wei('56.25 ether')
     min_insurance_tokens = Wei('55.5 ether')
     ldo_amount = Wei('50000 ether')
     steth_amount = Wei('12 ether')
     reference = "Purchase for slashing insurance"
 
-    print(f"You're going to propose sending {ldo_amount} LDO token-wei and {steth_amount} stETH token-wei to {insurance_purchaser_address} to purchase for slashing insurance (reference: '{reference}').")
+    print(f"You're going to propose a vote for purchasing a slashing insurance on Unslashed:")
+    print(f"DEPLOYER {deployer}")
+    print(f"insurance purchaser contract address {insurance_purchaser_address}")
+    print(f"insurance_amount {insurance_amount}")
+    print(f"min_insurance_tokens {min_insurance_tokens}")
+    print(f"ldo_amount {ldo_amount}")
+    print(f"steth_amount {steth_amount}")
+    print(f"reference {reference}")
     sys.stdout.write('Are you sure (y/n)? ')
 
     if not prompt_bool():

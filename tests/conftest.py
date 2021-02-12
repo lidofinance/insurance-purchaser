@@ -53,11 +53,6 @@ def dao_agent(interface):
 
 
 @pytest.fixture(scope='module')
-def steth_pool(interface):
-    return interface.StableSwapSTETH("0xDC24316b9AE028F1497c275EB9192a3Ea0f67022")
-
-
-@pytest.fixture(scope='module')
 def ldo_token(interface):
     return interface.ERC20("0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32")
 
@@ -83,26 +78,6 @@ def ldo_whale(accounts, ldo_token):
 @pytest.fixture(scope='module')
 def unslashed_token(interface):
     return interface.ERC20("0x2B76f72BFFcBE386EE6BD5F801f24f472dc9f633")
-
-
-class PurchaseHelpers:
-    InsurancePurchaser = None
-
-    @staticmethod
-    def deploy_purchaser(steth_eth_slippage, ldo_steth_slippage, deployer):
-        purchaser = PurchaseHelpers.InsurancePurchaser.deploy(
-            steth_eth_slippage,
-            ldo_steth_slippage,
-            {"from": deployer}
-        )
-
-        return purchaser
-
-
-@pytest.fixture(scope='module')
-def purchase_helpers(InsurancePurchaser):
-    PurchaseHelpers.InsurancePurchaser = InsurancePurchaser
-    return PurchaseHelpers
 
 
 class Helpers:

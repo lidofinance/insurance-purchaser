@@ -1,4 +1,3 @@
-import os
 from utils.evm_script import encode_call_script
 
 from brownie import (
@@ -15,11 +14,9 @@ from utils.config import (
     steth_token_address,
 )
 
-def main():
-    if 'INSURANCE_PURCHASER_ADDRESS' not in os.environ:
-        raise EnvironmentError('Please set the INSURANCE_PURCHASER_ADDRESS env variable')
 
-    insurance_purchaser = InsurancePurchaser.at(os.environ['INSURANCE_PURCHASER_ADDRESS'])
+def main():
+    insurance_purchaser = InsurancePurchaser.at("0x...")
     voting = interface.Voting(lido_dao_voting_address)
     token_manager = interface.TokenManager(lido_dao_token_manager_address)
     finance = interface.Finance(lido_dao_finance_address)

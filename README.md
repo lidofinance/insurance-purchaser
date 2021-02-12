@@ -17,7 +17,7 @@ To get started, first create and initialize a Python [virtual environment](https
 ```bash
 git clone https://github.com/lidofinance/insurance-purchaser.git
 cd insurance-purchaser
-export WEB3_CONNECTION_PROVIDER=your_infura_key_here
+export WEB3_INFURA_PROJECT_ID=infura-token
 brownie test
 ```
 
@@ -64,7 +64,7 @@ To propose a new purchase:
 2. Test it locally.
 
     ```bash
-    brownie run propose_insurance_purchas --network development
+    brownie run propose_insurance_purchase --network development
     ```
 3. Set DEPLOYER env variable to the deployer account name first (from ~/.brownie/accounts). Important: DEPLOYER acc should have some LDO governance token to be able to submit new vote.
 
@@ -74,6 +74,38 @@ To propose a new purchase:
 4. Submit the vote.
 
     ```bash
-    brownie run propose_insurance_purchas --network mainnet
+    brownie run propose_insurance_purchase --network mainnet
     ```
     When the script completes it will print the `vote_id`.
+
+
+## Playground
+
+
+1. Set WEB3_INFURA_PROJECT_ID and open brownie console.
+    ```bash
+    export WEB3_INFURA_PROJECT_ID=infura-token
+    brownie console --network development
+    ```
+
+2. Deploy insurance purchaser with script from the console
+    ```bash
+    >>> run("deploy.py")
+    >>> purchaser = InsurancePurchaser.at("0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6")
+    ```
+
+3. Edit the configuration settings within [`propose_insurance_purchase.py`](propose_insurance_purchase.py). Put right address for InsurancePurchaser.
+
+4. Get some LDO tokens to be able to submit a vote
+    ```bash
+    >>> run("get_coins.py")
+    >>> ldo_token = interface.ERC20("0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32")
+    >>> ldo_token.balanceOf(accounts[0])
+    ```
+
+5. Propose a vote and check the script
+    ```bash
+    >>> run("propose_insurance_purchase.py")
+    >>> voting = interface.Voting("0x2e59A20f205bB85a89C53f1936454680651E618e")
+    >>> voting.getVote(44)
+    ```

@@ -1,41 +1,33 @@
-from brownie import Wei
-from brownie.network.state import Chain
+from brownie import (
+    InsurancePurchaser,
+    Wei
+)
 
-from utils.evm_script import encode_call_script
-
-
-ONE_MINUTE = 60
-
-
-def test_happy_path(
+def test_purchase(
     steth_token,
-    steth_pool,
     ldo_token,
     unslashed_token,
-    dao_voting,
-    dao_agent,
     deployer,
-    stranger,
     steth_whale,
-    ldo_whale,
-    purchase_helpers
+    ldo_whale
 ):
-    # deploying and purhchase
-    insurance_purchaser = purchase_helpers.deploy_purchaser(
-        100,
-        500,
-        deployer=deployer
+    steth_to_eth_max_slippage = 100 # 1%
+    ldo_to_steth_max_slippage = 400 # 4%
+
+    insurance_purchaser = InsurancePurchaser.deploy(
+        steth_to_eth_max_slippage,
+        ldo_to_steth_max_slippage,
+        {"from": deployer},
     )
 
-    # steth_token.transfer(insurance_purchaser, Wei("1 ether"), {"from": steth_whale})
-    ldo_token.transfer(insurance_purchaser, Wei(
-        "2000 ether"), {"from": ldo_whale})
+    steth_token.transfer(insurance_purchaser, Wei("10 ether"), {"from": steth_whale})
+    ldo_token.transfer(insurance_purchaser, Wei("50000 ether"), {"from": ldo_whale})
 
     print('steth balance before', steth_token.balanceOf(insurance_purchaser))
     print('ldo balance before', ldo_token.balanceOf(insurance_purchaser))
-    tx = insurance_purchaser.purchase(
-        Wei("1 ether"), Wei("1.2 ether"), {"from": deployer})
 
-    print(tx.events)
+    tx = insurance_purchaser.purchase(Wei("56.25 ether"), Wei("70 ether"), {"from": deployer})
+
     print('unslashed_token afterall', unslashed_token.balanceOf(deployer))
-    assert unslashed_token.balanceOf(deployer) > 0
+
+    assert unslashed_token.balanceOf(deployer) > Wei("70 ether")

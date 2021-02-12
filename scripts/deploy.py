@@ -21,7 +21,7 @@ def main():
     deployer = get_deployer_account(is_live)
 
     steth_to_eth_max_slippage = 100
-    ldo_to_steth_max_slippage = 500
+    ldo_to_steth_max_slippage = 400
 
     print('Deployer:', deployer)
     print('Steth to eth max slippage (10000 bp max):', steth_to_eth_max_slippage)
@@ -45,3 +45,5 @@ def main():
         lido_dao_agent_address,
         {"from": deployer, "gas_price": Wei(gas_price), "required_confs": 1}
     )
+
+    print("Done!")

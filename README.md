@@ -85,6 +85,7 @@ To propose a new purchase:
 1. Set WEB3_INFURA_PROJECT_ID and open brownie console.
     ```bash
     export WEB3_INFURA_PROJECT_ID=infura-token
+    brownie networks modify development timeout=120
     brownie console --network development
     ```
 
@@ -108,4 +109,9 @@ To propose a new purchase:
     >>> run("propose_insurance_purchase.py")
     >>> voting = interface.Voting("0x2e59A20f205bB85a89C53f1936454680651E618e")
     >>> voting.getVote(44)
+    ```
+
+6. Perform voting.
+    ```bash
+    >>> run("perform_voting.py")
     ```

@@ -41,8 +41,8 @@ def test_vote_for_ldo_transfer(
 
     # deploy a proxy contract that will handle purchasing
     insurance_purchaser = InsurancePurchaser.deploy(
-        100,
-        400,
+        25,
+        500,
         {"from": deployer}
     )
 

@@ -5,8 +5,8 @@ from brownie import (
 )
 
 
-steth_to_eth_max_slippage = 100 # 1%
-ldo_to_steth_max_slippage = 400 # 4%
+steth_to_eth_max_slippage = 25 # 0.25%
+ldo_to_steth_max_slippage = 500 # 5%
 
 
 def test_owner_changes_owner(deployer, stranger):

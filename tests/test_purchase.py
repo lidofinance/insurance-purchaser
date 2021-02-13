@@ -11,8 +11,8 @@ def test_purchase(
     steth_whale,
     ldo_whale
 ):
-    steth_to_eth_max_slippage = 100 # 1%
-    ldo_to_steth_max_slippage = 400 # 4%
+    steth_to_eth_max_slippage = 25 # 0.25%
+    ldo_to_steth_max_slippage = 500 # 5%
 
     insurance_purchaser = InsurancePurchaser.deploy(
         steth_to_eth_max_slippage,

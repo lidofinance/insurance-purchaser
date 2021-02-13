@@ -53,7 +53,7 @@ def test_vote_for_ldo_transfer(
     insurance_amount = Wei('56.25 ether')
     min_insurance_tokens = Wei('70 ether')
     ldo_amount = Wei('50000 ether')
-    steth_amount = Wei('12 ether')
+    steth_amount = Wei('16 ether')
 
     vote_id = propose_insurance_purchase(
         insurance_purchaser=insurance_purchaser,

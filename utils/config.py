@@ -11,7 +11,7 @@ lido_dao_voting_address = '0x2e59A20f205bB85a89C53f1936454680651E618e'
 lido_dao_token_manager_address = '0xf73a1260d222f447210581DDf212D915c09a3249'
 
 
-gas_price = "165 gwei"
+gas_price = "190 gwei"
 
 
 def get_is_live():

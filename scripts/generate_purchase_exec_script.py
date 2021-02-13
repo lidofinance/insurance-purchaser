@@ -16,14 +16,15 @@ from utils.config import (
 
 
 def main():
-    insurance_purchaser = InsurancePurchaser.at("0x...")
+    insurance_purchaser = InsurancePurchaser.at("0x2Ca788280fB10384946D3ECC838D94DeCa505CF4")
     voting = interface.Voting(lido_dao_voting_address)
     token_manager = interface.TokenManager(lido_dao_token_manager_address)
     finance = interface.Finance(lido_dao_finance_address)
 
     ldo_amount = Wei('50000 ether')
-    steth_amount = Wei('13 ether')
+    steth_amount = Wei('16 ether')
     insurance_amount = Wei('56.25 ether')
+    min_insurance_tokens = Wei('70 ether')
     reference = "Purchase for slashing insurance"
 
     purchase_script = encode_call_script([
@@ -48,7 +49,8 @@ def main():
         (
             insurance_purchaser.address,
             insurance_purchaser.purchase.encode_input(
-                insurance_amount
+                insurance_amount,
+                min_insurance_tokens
             )
         )
     ])

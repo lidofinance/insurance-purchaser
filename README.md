@@ -27,11 +27,12 @@ To validate that a proposed vote for transferring tokens (LDO, stETH) to the Ins
 
 1. Open Lido [`voting app`](https://etherscan.io/address/0x2e59A20f205bB85a89C53f1936454680651E618e#readProxyContract) in etherscan, fetch the vote with the corresponding `id`, and extract the `script` field content.
 
-2. Check the configuration of the proposed purchase in [`scripts/generate_purchase_exec_script.py`](scripts/generate_purchase_exec_script.py) (`ldo_amount`, `steth_amount`, `insurance_amount`, `reference`).
+2. Check the configuration of the proposed purchase in [`scripts/generate_purchase_exec_script.py`](scripts/generate_purchase_exec_script.py) (`ldo_amount`, `steth_amount`, `insurance_amount`, `min_insurance_tokens`, `reference`).
 
 3. Run `scripts/generate_purchase_exec_script.py` and check that the exec script it generates matches the one extracted from the vote.
 
     ```bash
+    export WEB3_INFURA_PROJECT_ID=infura-token
     brownie run generate_purchase_exec_script --network mainnet
     ```
 

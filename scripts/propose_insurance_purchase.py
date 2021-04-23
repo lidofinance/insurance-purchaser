@@ -53,8 +53,10 @@ def propose_insurance_purchase(
     token_manager = interface.TokenManager(lido_dao_token_manager_address)
     finance = interface.Finance(lido_dao_finance_address)
 
-    payment_script = encode_call_script([
-        (
+    commands = []
+
+    if ldo_amount > 0:
+        commands.append((
             finance.address,
             finance.newImmediatePayment.encode_input(
                 ldo_token_address,
@@ -62,8 +64,10 @@ def propose_insurance_purchase(
                 ldo_amount,
                 reference
             )
-        ),
-        (
+        ))
+
+    if steth_amount > 0:
+        commands.append((
             finance.address,
             finance.newImmediatePayment.encode_input(
                 steth_token_address,
@@ -71,15 +75,19 @@ def propose_insurance_purchase(
                 steth_amount,
                 reference
             )
-        ),
-        (
-            insurance_purchaser.address,
-            insurance_purchaser.purchase.encode_input(
-                insurance_amount,
-                min_insurance_tokens
-            )
+        ))
+
+    commands.append((
+        insurance_purchaser.address,
+        insurance_purchaser.purchase.encode_input(
+            insurance_amount,
+            min_insurance_tokens
         )
-    ])
+    ))
+
+    print('commands for the voting:', commands)
+
+    payment_script = encode_call_script(commands)
 
     return create_vote(
         voting=voting,
@@ -95,10 +103,10 @@ def main():
     deployer = get_deployer_account(is_live)
 
     insurance_purchaser_address = "0x2Ca788280fB10384946D3ECC838D94DeCa505CF4"
-    insurance_amount = Wei('56.25 ether')
-    min_insurance_tokens = Wei('70 ether')
-    ldo_amount = Wei('50000 ether')
-    steth_amount = Wei('16 ether')
+    insurance_amount = Wei('32.7 ether')
+    min_insurance_tokens = Wei('75 ether')
+    ldo_amount = Wei('0 ether')
+    steth_amount = Wei('34 ether')
     reference = "Purchase for slashing insurance"
 
     print(f"You're going to propose a vote for purchasing a slashing insurance on Unslashed:")
